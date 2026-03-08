@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق دِين - الإصدار الكامل</title>
+    <title>تطبيق دِين Pro - الإصدار المتكامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -14,7 +14,7 @@
     <style>
         :root {
             --bg: #0f172a; --card-bg: #1e293b; --text: #f8fafc; --muted: #94a3b8; --accent: #c5a059;
-            --success: #2d5a27; --transition: all 0.4s ease;
+            --success: #2d5a27; --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         [data-theme="light"] {
             --bg: #f1f5f9; --card-bg: #ffffff; --text: #1e293b; --muted: #64748b; --accent: #b58d3f;
@@ -22,145 +22,160 @@
 
         body {
             background-color: var(--bg); color: var(--text);
-            font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; overflow-x: hidden;
-            transition: var(--transition);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding-bottom: 90px; overflow-x: hidden; transition: var(--transition);
         }
 
-        /* 1. شاشة الفتح (Splash) */
+        /* شاشة الفتح الفخمة */
         #splash {
-            position: fixed; inset: 0; background: #0f172a; z-index: 5000;
+            position: fixed; inset: 0; background: #0f172a; z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.8s ease;
         }
-        .splash-logo { font-size: 80px; color: #c5a059; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+        .splash-logo { font-size: 80px; color: var(--accent); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 20px var(--accent)); } }
 
-        /* 2. شاشات الإرشاد (Onboarding) */
+        /* شاشات الإرشاد */
         #onboarding {
-            position: fixed; inset: 0; background: var(--bg); z-index: 4000;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px; text-align: center;
+            position: fixed; inset: 0; background: var(--bg); z-index: 8888;
+            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center;
         }
-        .step { display: none; animation: slideIn 0.5s forwards; }
+        .step { display: none; animation: fadeIn 0.6s ease-out; }
         .step.active { display: block; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 3. صفحة تسجيل الدخول */
+        /* تسجيل الدخول */
         #login-screen {
-            position: fixed; inset: 0; background: var(--bg); z-index: 3000;
-            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+            position: fixed; inset: 0; background: var(--bg); z-index: 7777;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
         }
         .login-card {
-            background: var(--card-bg); padding: 40px 30px; border-radius: 30px;
-            width: 100%; max-width: 350px; text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 1px solid rgba(197, 160, 89, 0.1);
+            background: var(--card-bg); padding: 40px; border-radius: 35px; width: 85%; max-width: 400px;
+            text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3); border: 1px solid rgba(197, 160, 89, 0.1);
         }
 
-        /* 4. الواجهة الرئيسية */
-        .app-container { display: none; padding: 20px; max-width: 500px; margin: auto; padding-bottom: 100px; }
-        .card {
-            background: var(--card-bg); border-radius: 25px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(197, 160, 89, 0.05);
-        }
+        /* الواجهة الرئيسية */
+        .container { display: none; padding: 20px; max-width: 600px; margin: auto; }
+        .card { background: var(--card-bg); border-radius: 30px; padding: 25px; margin-bottom: 20px; border: 1px solid rgba(197, 160, 89, 0.05); transition: var(--transition); }
 
-        /* حلقة التقدم */
-        .circle-box {
-            width: 130px; height: 130px; border-radius: 50%;
+        /* الدائرة المتطورة */
+        .progress-box {
+            width: 150px; height: 150px; border-radius: 50%;
             background: conic-gradient(var(--accent) 0deg, #334155 0deg);
-            margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;
-            position: relative; transition: 1s;
+            margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; position: relative;
         }
-        .circle-box::after { content: ""; position: absolute; width: 110px; height: 110px; background: var(--card-bg); border-radius: 50%; }
-        .circle-val { position: relative; z-index: 10; font-size: 26px; font-weight: 800; color: var(--accent); }
+        .progress-box::after { content: ""; position: absolute; width: 125px; height: 125px; background: var(--card-bg); border-radius: 50%; }
+        .progress-val { position: relative; z-index: 10; font-size: 28px; font-weight: bold; color: var(--accent); }
 
-        /* الأزرار والتنقل */
-        .btn-main {
-            width: 100%; padding: 18px; border-radius: 20px; border: none;
-            background: var(--accent); color: white; font-weight: bold; cursor: pointer;
-            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2); transition: 0.3s;
+        /* الأزرار */
+        .btn-glow {
+            width: 100%; padding: 20px; border-radius: 20px; border: none;
+            background: var(--accent); color: white; font-weight: bold; font-size: 16px;
+            cursor: pointer; box-shadow: 0 10px 25px rgba(197, 160, 89, 0.3); transition: 0.3s;
         }
-        .btn-main:active { transform: scale(0.98); }
+        .btn-glow:active { transform: scale(0.97); }
 
-        .nav-bar {
+        /* التنقل السفلي العائم */
+        .nav-float {
             position: fixed; bottom: 20px; left: 20px; right: 20px;
             background: var(--card-bg); height: 75px; border-radius: 40px;
             display: flex; justify-content: space-around; align-items: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3); border: 1px solid rgba(197, 160, 89, 0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); z-index: 1000;
         }
         .nav-item { color: var(--muted); font-size: 22px; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { color: var(--accent); transform: translateY(-5px); }
+        .nav-item.active { color: var(--accent); transform: translateY(-8px); }
 
-        .back-btn { position: fixed; top: 20px; left: 20px; width: 45px; height: 45px; background: var(--card-bg); border-radius: 50%; display: none; align-items: center; justify-content: center; color: var(--accent); border: 1px solid var(--accent); z-index: 1001; }
-        .theme-btn { position: fixed; top: 20px; right: 20px; width: 45px; height: 45px; background: var(--card-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); border: 1px solid var(--accent); z-index: 1001; }
+        /* أيقونات التحكم العلوية */
+        .top-ctrl { position: fixed; top: 20px; display: flex; gap: 15px; z-index: 1001; }
+        .ctrl-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; color: var(--accent); border: 1px solid var(--accent); cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
+        .prayer-row { display: flex; justify-content: space-between; padding: 15px; background: rgba(197, 160, 89, 0.05); margin: 10px 0; border-radius: 18px; }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
     <div id="splash">
         <i class="fas fa-mosque splash-logo"></i>
-        <h1 style="color: #c5a059; margin-top: 20px; letter-spacing: 3px;">دِيــــن</h1>
+        <h1 style="color: var(--accent); margin-top: 20px; letter-spacing: 5px;">دِيــــن</h1>
     </div>
 
-    <div class="back-btn" id="backBtn" onclick="showTab('home')"><i class="fas fa-arrow-right"></i></div>
-    <div class="theme-btn" onclick="toggleTheme()"><i id="tIcon" class="fas fa-sun"></i></div>
-
     <div id="onboarding">
-        <div class="step active" id="s1">
-            <i class="fas fa-kaaba splash-logo" style="font-size: 70px;"></i>
-            <h2>مرحباً بك في دِين</h2>
-            <p>رفيقك المتطور لتنظيم العبادات ومحاسبة النفس.</p>
+        <div class="step active" id="st1">
+            <i class="fas fa-heart onboard-icon" style="font-size: 80px; color: var(--accent); margin-bottom: 20px;"></i>
+            <h2>مرحباً بك في رحلة التغيير</h2>
+            <p>تطبيق دِين يساعدك على تنظيم صلواتك وقضاء ما فاتك بكل سهولة وخصوصية.</p>
         </div>
-        <div class="step" id="s2">
-            <i class="fas fa-history splash-logo" style="font-size: 70px;"></i>
-            <h2>مزامنة سحابية آمنة</h2>
-            <p>بياناتك محفوظة في السحاب ومحمية بأعلى معايير الأمان.</p>
+        <div class="step" id="st2">
+            <i class="fas fa-cloud-upload-alt" style="font-size: 80px; color: var(--accent); margin-bottom: 20px;"></i>
+            <h2>بياناتك في أمان</h2>
+            <p>نستخدم تقنيات جوجل السحابية لنضمن لك وصولاً آمناً لبياناتك من أي مكان.</p>
         </div>
-        <button class="btn-main" onclick="nextStep()" style="max-width: 200px; margin-top: 30px;">التالي</button>
+        <button class="btn-glow" style="max-width: 200px; margin-top: 30px;" onclick="nextStep()">التالي</button>
     </div>
 
     <div id="login-screen">
         <div class="login-card">
-            <h3 style="margin-bottom: 25px;">ابدأ رحلتك الآن</h3>
-            <button class="btn-main" style="background: #fff; color: #333; margin-bottom: 15px;" onclick="login()">
-                <i class="fab fa-google"></i> الدخول بجوجل
+            <i class="fas fa-user-shield" style="font-size: 50px; color: var(--accent); margin-bottom: 20px;"></i>
+            <h3>تسجيل دخول آمن</h3>
+            <p style="color: var(--muted); font-size: 14px; margin-bottom: 30px;">للمزامنة وحفظ تقدمك، يرجى الدخول بحساب جوجل</p>
+            <button class="btn-glow" style="background: white; color: #333;" onclick="login()">
+                <i class="fab fa-google" style="color: #ea4335; margin-left: 10px;"></i> الدخول بواسطة جوجل
             </button>
-            <p style="font-size: 12px; color: var(--muted);">بالدخول أنت توافق على شروط الاستخدام</p>
         </div>
     </div>
 
-    <div class="app-container" id="main-app">
-        <header style="margin-top: 40px; margin-bottom: 20px;">
-            <h2 id="welcomeTxt">السلام عليكم 🌙</h2>
-            <p id="hijriTxt" style="color: var(--muted); font-size: 14px;"></p>
+    <div class="container" id="main-app">
+        <div class="top-ctrl" style="right: 20px;">
+            <div class="ctrl-btn" onclick="toggleTheme()"><i id="themeIcon" class="fas fa-sun"></i></div>
+        </div>
+        <div class="top-ctrl" style="left: 20px; display: none;" id="backBtnDiv">
+            <div class="ctrl-btn" onclick="showTab('home')"><i class="fas fa-arrow-left"></i></div>
+        </div>
+
+        <header style="padding: 40px 0 20px;">
+            <h1 id="userHello" style="margin: 0; font-size: 28px;">السلام عليكم 🌙</h1>
+            <p id="dateToday" style="color: var(--muted); margin-top: 10px;"></p>
         </header>
 
         <div id="tab-home">
             <div class="card" style="text-align: center;">
-                <div class="circle-box" id="pRing"><span class="circle-val" id="pPercent">0%</span></div>
-                <h3 style="margin: 5px 0;">تقدم القضاء</h3>
-                <p style="color: var(--muted); font-size: 14px;">المتبقي: <span id="remCount">0</span> صلاة</p>
+                <div class="progress-box" id="mainRing"><span class="progress-val" id="percentTxt">0%</span></div>
+                <h3>خطة قضاء الفوائت</h3>
+                <p style="color: var(--muted);">المتبقي لك: <span id="missedCount" style="color: var(--accent); font-weight: bold;">0</span> صلاة</p>
             </div>
-            <button class="btn-main" onclick="recordQada()">+ تسجيل قضاء صلاة واحدة</button>
+
+            <div style="margin: 25px 0 10px; font-weight: bold; color: var(--accent);">صلوات اليوم (الورد اليومي)</div>
+            <div class="card">
+                <div class="prayer-row"><span>الفجر</span><input type="checkbox" style="accent-color: var(--accent); width: 20px; height: 20px;"></div>
+                <div class="prayer-row"><span>الظهر</span><input type="checkbox" style="accent-color: var(--accent); width: 20px; height: 20px;"></div>
+                <div class="prayer-row"><span>العصر</span><input type="checkbox" style="accent-color: var(--accent); width: 20px; height: 20px;"></div>
+                <div class="prayer-row"><span>المغرب</span><input type="checkbox" style="accent-color: var(--accent); width: 20px; height: 20px;"></div>
+                <div class="prayer-row"><span>العشاء</span><input type="checkbox" style="accent-color: var(--accent); width: 20px; height: 20px;"></div>
+            </div>
+
+            <button class="btn-glow" onclick="addQada()">
+                <i class="fas fa-plus-circle" style="margin-left: 8px;"></i> تسجيل قضاء صلاة واحدة
+            </button>
         </div>
 
         <div id="tab-settings" style="display: none;">
             <div class="card">
-                <h3>حساب الفوائت</h3>
-                <label style="font-size: 14px;">تاريخ الميلاد:</label>
-                <input type="date" id="birthDate" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; border:1px solid var(--muted); background:none; color:inherit;">
-                <button class="btn-main" style="background: var(--success);" onclick="initCalculations()">حفظ وحساب البيانات</button>
+                <h3>إعدادات المحاسبة</h3>
+                <p style="font-size: 14px; color: var(--muted);">أدخل تاريخ ميلادك وسيقوم التطبيق بحساب الفوائت تلقائياً من سن الـ 15.</p>
+                <input type="date" id="bDay" style="width: 100%; padding: 15px; border-radius: 15px; border: 1px solid var(--accent); background: none; color: inherit; margin: 15px 0;">
+                <button class="btn-glow" style="background: var(--success);" onclick="calculateInitial()">حفظ وحساب البيانات</button>
             </div>
         </div>
 
-        <div class="nav-bar">
-            <i class="fas fa-home nav-item active" onclick="showTab('home', this)"></i>
+        <div class="nav-float">
+            <i class="fas fa-th-large nav-item active" onclick="showTab('home', this)"></i>
+            <i class="fas fa-robot nav-item" onclick="alert('المساعد الذكي سيتوفر في التحديث القادم')"></i>
+            <i class="fas fa-history nav-item"></i>
             <i class="fas fa-cog nav-item" onclick="showTab('settings', this)"></i>
         </div>
     </div>
 
     <script>
-        // 1. إعدادات Firebase الخاصة بك
+        // تكوين Firebase (البيانات التي استخرجتها أنت)
         const firebaseConfig = {
             apiKey: "AIzaSyDEab-wZCoMN7NPOprJfGTNfXihSPxxJIc",
             authDomain: "deen-5bf28.firebaseapp.com",
@@ -176,63 +191,65 @@
         const db = firebase.firestore();
         const analytics = firebase.analytics();
 
-        // 2. منطق الشاشات
+        // 1. منطق شاشات البداية
         window.onload = () => {
             setTimeout(() => {
                 document.getElementById('splash').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('splash').style.display = 'none';
-                    document.getElementById('onboarding').style.display = 'flex';
+                    // إذا لم يكن مسجلاً، أظهر الإرشاد
+                    if(!localStorage.getItem('onboarded')) {
+                        document.getElementById('onboarding').style.display = 'flex';
+                    } else {
+                        checkAuth();
+                    }
                 }, 800);
             }, 3000);
         };
 
-        let currentStep = 1;
         function nextStep() {
-            if(currentStep < 2) {
-                document.getElementById('s1').classList.remove('active');
-                currentStep++;
-                document.getElementById('s2').classList.add('active');
+            if(document.getElementById('st1').classList.contains('active')) {
+                document.getElementById('st1').classList.remove('active');
+                document.getElementById('st2').classList.add('active');
             } else {
+                localStorage.setItem('onboarded', 'true');
                 document.getElementById('onboarding').style.display = 'none';
-                document.getElementById('login-screen').style.display = 'flex';
+                checkAuth();
             }
         }
 
-        // 3. تسجيل الدخول والمزامنة
-        function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).then((res) => {
-                analytics.logEvent('login', { method: 'google' });
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-                document.getElementById('welcomeTxt').innerText = "أهلاً " + res.user.displayName.split(' ')[0] + " 🌙";
-                loadData(res.user.uid);
-                updateDate();
+        function checkAuth() {
+            auth.onAuthStateChanged(user => {
+                if(user) {
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('main-app').style.display = 'block';
+                    document.getElementById('userHello').innerText = "أهلاً " + user.displayName.split(' ')[0] + " 🌙";
+                    loadData(user.uid);
+                    updateDate();
+                } else {
+                    document.getElementById('login-screen').style.display = 'flex';
+                }
             });
         }
 
-        // 4. الحسابات والبيانات
-        let missed = 0, done = 0;
-
-        function initCalculations() {
-            const birth = new Date(document.getElementById('birthDate').value);
-            if(!birth.getTime()) return alert("يرجى اختيار تاريخ الميلاد");
-            
-            const puberty = new Date(birth.getFullYear() + 15, birth.getMonth(), birth.getDate());
-            const days = Math.floor((new Date() - puberty) / (1000 * 60 * 60 * 24));
-            missed = days > 0 ? days * 5 : 0;
-            saveData();
-            showTab('home');
+        // 2. تسجيل الدخول والمزامنة
+        function login() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then(() => {
+                analytics.logEvent('login_success');
+            }).catch(e => alert("حدث خطأ: " + e.message));
         }
 
-        function recordQada() {
-            if(missed > 0) {
-                done++; missed--;
-                updateUI();
-                saveData();
-                analytics.logEvent('qada_added');
-            }
+        let missed = 0, done = 0;
+
+        function loadData(uid) {
+            db.collection("users").doc(uid).get().then(doc => {
+                if(doc.exists) {
+                    missed = doc.data().missed || 0;
+                    done = doc.data().done || 0;
+                    updateUI();
+                }
+            });
         }
 
         function saveData() {
@@ -245,29 +262,38 @@
             updateUI();
         }
 
-        function loadData(uid) {
-            db.collection("users").doc(uid).get().then(doc => {
-                if(doc.exists) {
-                    missed = doc.data().missed || 0;
-                    done = doc.data().done || 0;
-                    updateUI();
-                }
-            });
+        // 3. الحسابات والواجهة
+        function calculateInitial() {
+            const bDate = new Date(document.getElementById('bDay').value);
+            if(!bDate.getTime()) return alert("يرجى اختيار تاريخ الميلاد");
+            const pubDate = new Date(bDate.getFullYear() + 15, bDate.getMonth(), bDate.getDate());
+            const days = Math.floor((new Date() - pubDate) / (1000 * 60 * 60 * 24));
+            missed = days > 0 ? days * 5 : 0;
+            saveData();
+            showTab('home');
+        }
+
+        function addQada() {
+            if(missed > 0) {
+                done++; missed--;
+                saveData();
+                analytics.logEvent('qada_added');
+            }
         }
 
         function updateUI() {
             const total = missed + done;
             const percent = total === 0 ? 0 : Math.round((done / total) * 100);
-            document.getElementById('pPercent').innerText = percent + "%";
-            document.getElementById('remCount').innerText = missed;
-            document.getElementById('pRing').style.background = `conic-gradient(var(--accent) ${percent * 3.6}deg, #334155 0deg)`;
+            document.getElementById('percentTxt').innerText = percent + "%";
+            document.getElementById('missedCount').innerText = missed;
+            document.getElementById('mainRing').style.background = `conic-gradient(var(--accent) ${percent * 3.6}deg, #334155 0deg)`;
         }
 
-        // 5. التنقل والسمات
+        // 4. التنقل والسمات
         function showTab(tab, el) {
             document.getElementById('tab-home').style.display = tab === 'home' ? 'block' : 'none';
             document.getElementById('tab-settings').style.display = tab === 'settings' ? 'block' : 'none';
-            document.getElementById('backBtn').style.display = tab === 'settings' ? 'flex' : 'none';
+            document.getElementById('backBtnDiv').style.display = tab === 'settings' ? 'flex' : 'none';
             
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             if(el) el.classList.add('active');
@@ -277,12 +303,12 @@
             const b = document.body;
             const isDark = b.getAttribute('data-theme') === 'dark';
             b.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            document.getElementById('tIcon').className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+            document.getElementById('themeIcon').className = isDark ? 'fas fa-moon' : 'fas fa-sun';
         }
 
         function updateDate() {
-            const opt = { weekday: 'long', day: 'numeric', month: 'long' };
-            document.getElementById('hijriTxt').innerText = new Intl.DateTimeFormat('ar-SA', opt).format(new Date());
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('dateToday').innerText = new Intl.DateTimeFormat('ar-SA', options).format(new Date());
         }
     </script>
 </body>
