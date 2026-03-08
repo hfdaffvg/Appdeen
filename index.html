@@ -3,321 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق دِين Pro - الإصدار المتكامل</title>
+    <title>أكاديمية دِين - الإصدار الاحترافي V1.1</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
-            --bg: #0a0e14; --card: #151a22; --accent: #c5a059; --text: #f0f0f0;
-            --gold-grad: linear-gradient(135deg, #c5a059 0%, #f9e2af 100%);
-            --shadow: 0 10px 30px rgba(0,0,0,0.5);
+            --bg: #05080a; --card: #0f141a; --accent: #d4af37; --text: #f0f0f0;
+            --gold-grad: linear-gradient(135deg, #d4af37 0%, #f9e2af 100%);
         }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
+
+        /* شاشة تسجيل الدخول المتعددة */
+        #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { background: var(--card); padding: 30px; border-radius: 25px; border: 1px solid var(--accent); width: 100%; max-width: 400px; text-align: center; }
+        .auth-btn { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn-google { background: #fff; color: #000; }
+        .btn-fb { background: #1877f2; color: #fff; }
+        .btn-git { background: #333; color: #fff; }
+        .btn-tw { background: #1da1f2; color: #fff; }
+        .btn-ms { background: #2f2f2f; color: #fff; }
+        .btn-apple { background: #000; color: #fff; }
+
+        /* التنسيق العام للتطبيق */
+        .glass { background: var(--card); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; padding: 20px; margin: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn-gold { background: var(--gold-grad); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
         
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
+        #chat-v { height: 280px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #1e2530; margin-bottom: 10px; }
+        .msg { padding: 12px; border-radius: 15px; max-width: 85%; font-size: 14px; }
+        .msg.bot { background: #1a212c; align-self: flex-start; border-right: 3px solid var(--accent); }
+        .msg.user { background: var(--accent); color: #000; align-self: flex-end; }
 
-        /* الشاشات التحضيرية */
-        #splash { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-
-        /* الهيكل العام */
-        .container { display: none; max-width: 500px; margin: auto; padding: 20px; }
-        .glass { background: var(--card); border: 1px solid rgba(197, 160, 89, 0.15); border-radius: 25px; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
-
-        /* أوقات الصلاة */
-        .p-bar { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
-        .p-item { min-width: 85px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 15px; text-align: center; border: 1px solid transparent; }
-        .p-item.active { border-color: var(--accent); background: rgba(197, 160, 89, 0.1); animation: glow 2s infinite; }
-        @keyframes glow { 0%, 100% { box-shadow: 0 0 5px var(--accent); } 50% { box-shadow: 0 0 15px var(--accent); } }
-
-        /* نظام القضاء */
-        .q-circle { width: 150px; height: 150px; border-radius: 50%; border: 5px solid #1e2530; margin: 20px auto; display: flex; align-items: center; justify-content: center; position: relative; }
-        .q-circle span { font-size: 35px; font-weight: 800; color: var(--accent); }
-
-        /* نظام الأكاديمية */
-        .book-card { display: flex; align-items: center; justify-content: space-between; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 15px; margin-bottom: 10px; border-right: 4px solid var(--accent); }
-        .btn-action { background: var(--gold-grad); color: #000; border: none; padding: 15px; border-radius: 15px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.3s; }
-        .btn-action:active { transform: scale(0.95); }
-
-        /* الدردشة الذكية */
-        #chat-box { height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px; }
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; line-height: 1.5; font-size: 14px; }
-        .msg.bot { background: #232a35; align-self: flex-start; border-right: 3px solid var(--accent); }
-        .msg.user { background: var(--accent); color: white; align-self: flex-end; }
-
-        /* المودال */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 11000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card); padding: 30px; border-radius: 25px; text-align: center; width: 100%; max-width: 400px; border: 1px solid var(--accent); }
-
-        /* التنقل */
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #11161d; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #1e2530; }
-        .nav i { color: #586069; font-size: 22px; cursor: pointer; }
+        .nav { position: fixed; bottom: 0; width: 100%; background: #0a0d14; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #1e2533; }
+        .nav i { color: #4b5563; font-size: 22px; cursor: pointer; }
         .nav i.active { color: var(--accent); }
+
+        .logout-btn { color: #ff4d4d; font-size: 12px; cursor: pointer; margin-top: 10px; display: inline-block; }
     </style>
 </head>
 <body>
 
-    <div id="splash">
-        <i class="fas fa-kaaba" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
-        <h2 style="letter-spacing: 5px; color: var(--accent);">دِيـــــن</h2>
-    </div>
+    <audio id="snd-click" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+    <audio id="snd-success" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
 
-    <div id="auth-screen">
-        <div class="glass" style="width: 85%;">
-            <i class="fas fa-user-circle" style="font-size: 50px; color: var(--accent); margin-bottom: 20px;"></i>
-            <h3>مرحباً بك في دِين</h3>
-            <p style="color: #8b949e; margin-bottom: 30px;">سجل دخولك لمزامنة صلواتك وتقدمك العلمي</p>
-            <button class="btn-action" onclick="login()"><i class="fab fa-google"></i> الدخول بواسطة جوجل</button>
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <i class="fas fa-mosque" style="font-size: 40px; color: var(--accent); margin-bottom: 15px;"></i>
+            <h2>تسجيل الدخول إلى دِين</h2>
+            <button class="auth-btn btn-google" onclick="doLogin('google')"><i class="fab fa-google"></i> Google</button>
+            <button class="auth-btn btn-fb" onclick="doLogin('fb')"><i class="fab fa-facebook"></i> Facebook</button>
+            <button class="auth-btn btn-tw" onclick="doLogin('twitter')"><i class="fab fa-twitter"></i> Twitter</button>
+            <button class="auth-btn btn-git" onclick="doLogin('github')"><i class="fab fa-github"></i> GitHub</button>
+            <button class="auth-btn btn-ms" onclick="doLogin('microsoft')"><i class="fab fa-microsoft"></i> Microsoft</button>
+            <button class="auth-btn btn-apple" onclick="doLogin('apple')"><i class="fab fa-apple"></i> Apple</button>
         </div>
     </div>
 
-    <div class="container" id="app">
-        <header style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <span id="rank-name" style="color: var(--accent); font-size: 12px; font-weight: bold;">طالب علم مبتدئ</span>
-                <h2 id="welcome-msg" style="margin: 5px 0;">أهلاً بك</h2>
-            </div>
-            <div id="user-img" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent); overflow: hidden;">
-                <img src="" id="u-photo" style="width: 100%;">
-            </div>
+    <div id="app-main" style="display:none;">
+        <header style="padding: 20px; text-align: center;">
+            <div id="rank-name" style="color: var(--accent); font-weight: bold; font-size: 13px;">طالب مبتدئ</div>
+            <h3 id="user-display">مرحباً بك</h3>
+            <span class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</span>
         </header>
 
-        <div class="p-bar" id="prayer-times"></div>
-
-        <div id="tab-home" class="tab-content">
-            <div class="glass" style="text-align: center;">
-                <h3>فوائت الصلاة</h3>
-                <div class="q-circle">
-                    <span id="missed-count">0</span>
-                </div>
-                <button class="btn-action" onclick="addQada(-1)">تم قضاء صلاة واحدة ✅</button>
-                <p style="font-size: 12px; color: #8b949e; margin-top: 15px;" onclick="manualSet()">تعديل الرقم يدوياً</p>
-            </div>
-        </div>
-
-        <div id="tab-academy" class="tab-content" style="display:none;">
+        <div id="tab-learn" class="page">
             <div class="glass">
-                <h3 style="margin-bottom: 20px;"><i class="fas fa-graduation-cap"></i> المنهج العلمي</h3>
+                <h3>📚 مسارك العلمي</h3>
                 <div id="books-list"></div>
-                <button id="exam-trigger" class="btn-action" style="display:none; margin-top: 20px;" onclick="openExam()">بدء اختبار الترقية 📝</button>
+                <button id="quiz-btn" class="btn-gold" style="display:none;" onclick="openExam()">بدء الاختبار النهائي 📝</button>
             </div>
         </div>
 
-        <div id="tab-ai" class="tab-content" style="display:none;">
+        <div id="tab-ai" class="page" style="display:none;">
             <div class="glass">
-                <div id="chat-box">
-                    <div class="msg bot">مرحباً! أنا مساعدك الذكي. اسألني عن أي مسألة في العقيدة، الفقه أو الحديث.</div>
+                <div id="chat-v">
+                    <div class="msg bot">مرحباً! أنا خبيرك الشرعي، اسألني ما شئت.</div>
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <input type="text" id="ai-input" placeholder="اكتب سؤالك..." style="flex:1; background:#0a0e14; border:1px solid #1e2530; color:white; padding:12px; border-radius:10px;">
-                    <button onclick="askAI()" style="background:var(--accent); border:none; padding:10px 15px; border-radius:10px;"><i class="fas fa-paper-plane"></i></button>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="ai-q" placeholder="اسأل هنا..." style="flex:1; background:#05080a; border:1px solid #1e2530; color:white; padding:12px; border-radius:10px;">
+                    <button onclick="askAI()" style="background:var(--accent); border:none; padding:12px; border-radius:10px;"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
 
         <nav class="nav">
-            <i class="fas fa-home active" onclick="switchNav('home', this)"></i>
-            <i class="fas fa-book-reader" onclick="switchNav('academy', this)"></i>
-            <i class="fas fa-robot" onclick="switchNav('ai', this)"></i>
+            <i class="fas fa-graduation-cap active" onclick="nav('learn', this)"></i>
+            <i class="fas fa-robot" onclick="nav('ai', this)"></i>
+            <i class="fas fa-user-cog" onclick="alert('قريباً: الإعدادات')"></i>
         </nav>
     </div>
 
-    <div id="exam-modal" class="modal">
-        <div class="modal-content">
-            <h3 id="q-text" style="color: var(--accent);">السؤال</h3>
-            <div id="q-options" style="margin-top: 20px;"></div>
-        </div>
-    </div>
-
     <script>
-        // --- الإعدادات (Firebase & AI) ---
-        const firebaseConfig = {
+        // --- تهيئة Firebase ---
+        const config = {
             apiKey: "AIzaSyDEab-wZCoMN7NPOprJfGTNfXihSPxxJIc",
             authDomain: "deen-5bf28.firebaseapp.com",
             projectId: "deen-5bf28",
             storageBucket: "deen-5bf28.firebasestorage.app",
-            messagingSenderId: "540844424438",
             appId: "1:540844424438:web:6b2cdfefd0ca4ca83c80d7"
         };
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(config);
         const auth = firebase.auth();
-        const db = firebase.firestore();
 
-        const GROQ_KEY = "Gsk_7k40E9I8Z23qECQOXOxtWGdyb3FY5lCz89G3ZQjpEcXSSR85Fkfo";
-        
-        let userData = { missed: 0, level: 1, finished: [] };
-
-        // --- نظام التشغيل ---
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('splash').style.display = 'none';
-                checkUser();
-            }, 2500);
-        };
-
-        function checkUser() {
-            auth.onAuthStateChanged(user => {
-                if(user) {
-                    document.getElementById('auth-screen').style.display = 'none';
-                    document.getElementById('app').style.display = 'block';
-                    document.getElementById('welcome-msg').innerText = "أهلاً " + user.displayName.split(' ')[0];
-                    document.getElementById('u-photo').src = user.photoURL;
-                    loadData(user.uid);
-                    getPrayers();
-                } else {
-                    document.getElementById('auth-screen').style.display = 'flex';
-                }
-            });
-        }
-
-        function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
-        }
-
-        // --- البيانات ---
-        function loadData(uid) {
-            db.collection("users").doc(uid).get().then(doc => {
-                if(doc.exists) {
-                    userData = doc.data();
-                    updateUI();
-                }
-                renderBooks();
-            });
-        }
-
-        function saveData() {
-            const user = auth.currentUser;
-            if(user) db.collection("users").doc(user.uid).set(userData, {merge: true});
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('missed-count').innerText = userData.missed || 0;
-            document.getElementById('rank-name').innerText = ["مبتدئ", "ناشئ", "متمرس", "عالم"][userData.level - 1];
-        }
-
-        function addQada(v) {
-            userData.missed += v;
-            if(userData.missed < 0) userData.missed = 0;
-            saveData();
-        }
-
-        // --- الأكاديمية ---
-        const academicSystem = {
-            1: { books: [{n:"الأصول الثلاثة", u:"https://ia800203.us.archive.org/21/items/waq63750/63750.pdf", id:"a1"}, {n:"الأربعون النووية", u:"https://ia800902.us.archive.org/32/items/waq27513/27513.pdf", id:"a2"}], q:"ما هي الأصول الثلاثة؟", o:["معرفة الرب، الدين، النبي", "الصلاة، الصوم، الحج"], a:0 },
-            2: { books: [{n:"كتاب التوحيد", u:"https://ia801306.us.archive.org/16/items/waq466/466.pdf", id:"a3"}], q:"ما معنى كلمة التوحيد؟", o:["إفراد الله بالعبادة", "الإيمان بالملائكة"], a:0 }
-        };
-
-        function renderBooks() {
-            const list = document.getElementById('books-list');
-            const data = academicSystem[userData.level];
-            if(!data) { list.innerHTML = "ختمت المنهج!"; return; }
-            
-            list.innerHTML = data.books.map(b => `
-                <div class="book-card">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <input type="checkbox" onchange="toggleBook('${b.id}')" ${userData.finished.includes(b.id)?'checked':''}>
-                        <span>${b.n}</span>
-                    </div>
-                    <a href="${b.u}" target="_blank" style="color:var(--accent)"><i class="fas fa-file-pdf"></i></a>
-                </div>
-            `).join('');
-            checkExamAvailability();
-        }
-
-        function toggleBook(id) {
-            if(!userData.finished) userData.finished = [];
-            if(userData.finished.includes(id)) userData.finished = userData.finished.filter(i => i !== id);
-            else userData.finished.push(id);
-            saveData();
-            checkExamAvailability();
-        }
-
-        function checkExamAvailability() {
-            const currentBooks = academicSystem[userData.level].books;
-            const doneAll = currentBooks.every(b => userData.finished.includes(b.id));
-            document.getElementById('exam-trigger').style.display = doneAll ? 'block' : 'none';
-        }
-
-        function openExam() {
-            const modal = document.getElementById('exam-modal');
-            const data = academicSystem[userData.level];
-            modal.style.display = 'flex';
-            document.getElementById('q-text').innerText = data.q;
-            document.getElementById('q-options').innerHTML = data.o.map((o, i) => `
-                <button class="btn-action" style="margin-bottom:10px;" onclick="checkAnswer(${i})">${o}</button>
-            `).join('');
-        }
-
-        function checkAnswer(i) {
-            if(i === academicSystem[userData.level].a) {
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                userData.level++;
-                userData.finished = [];
-                alert("أحسنت! تم ترقيتك.");
-            } else {
-                alert("إجابة خاطئة، راجع الكتب.");
+        // --- نظام تسجيل الدخول ---
+        function doLogin(type) {
+            let provider;
+            switch(type) {
+                case 'google': provider = new firebase.auth.GoogleAuthProvider(); break;
+                case 'fb': provider = new firebase.auth.FacebookAuthProvider(); break;
+                case 'github': provider = new firebase.auth.GithubAuthProvider(); break;
+                case 'twitter': provider = new firebase.auth.TwitterAuthProvider(); break;
+                // ملاحظة: Apple و Microsoft تتطلب إعدادات إضافية في لوحة تحكم Firebase
+                default: provider = new firebase.auth.GoogleAuthProvider();
             }
-            document.getElementById('exam-modal').style.display = 'none';
-            saveData();
-            renderBooks();
+            auth.signInWithPopup(provider).catch(e => alert("خطأ في تسجيل الدخول: " + e.message));
         }
 
-        // --- الذكاء الاصطناعي (GROQ) ---
+        function doLogout() {
+            auth.signOut().then(() => location.reload());
+        }
+
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('app-main').style.display = 'block';
+                document.getElementById('user-display').innerText = "مرحباً " + user.displayName;
+                renderBooks();
+            } else {
+                document.getElementById('auth-overlay').style.display = 'flex';
+                document.getElementById('app-main').style.display = 'none';
+            }
+        });
+
+        // --- الذكاء الاصطناعي (Groq) ---
         async function askAI() {
-            const inp = document.getElementById('ai-input');
-            const box = document.getElementById('chat-box');
+            const inp = document.getElementById('ai-q');
+            const chat = document.getElementById('chat-v');
             if(!inp.value) return;
-            const q = inp.value;
-            box.innerHTML += `<div class="msg user">${q}</div>`;
+            document.getElementById('snd-click').play();
+
+            const text = inp.value;
+            chat.innerHTML += `<div class="msg user">${text}</div>`;
             inp.value = '';
 
             try {
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
-                    headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
+                    headers: { "Authorization": "Bearer Gsk_7k40E9I8Z23qECQOXOxtWGdyb3FY5lCz89G3ZQjpEcXSSR85Fkfo", "Content-Type": "application/json" },
                     body: JSON.stringify({
                         model: "llama3-8b-8192",
-                        messages: [{ role: "system", content: "أنت عالم إسلامي تجيب بوقار ودقة." }, { role: "user", content: q }]
+                        messages: [{ role: "system", content: "أنت عالم شرعي مجيب بوقار." }, { role: "user", content: text }]
                     })
                 });
                 const d = await res.json();
-                box.innerHTML += `<div class="msg bot">${d.choices[0].message.content}</div>`;
-            } catch (e) { box.innerHTML += `<div class="msg bot">خطأ في الاتصال بالسحاب.</div>`; }
-            box.scrollTop = box.scrollHeight;
+                chat.innerHTML += `<div class="msg bot">${d.choices[0].message.content}</div>`;
+            } catch(e) { chat.innerHTML += `<div class="msg bot">خطأ في الاتصال.</div>`; }
+            chat.scrollTop = chat.scrollHeight;
         }
 
-        // --- أوقات الصلاة ---
-        function getPrayers() {
-            navigator.geolocation.getCurrentPosition(pos => {
-                fetch(`https://api.aladhan.com/v1/timings?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&method=4`)
-                .then(r => r.json()).then(d => {
-                    const t = d.data.timings;
-                    const map = { Fajr: "فجر", Dhuhr: "ظهر", Asr: "عصر", Maghrib: "مغرب", Isha: "عشاء" };
-                    document.getElementById('prayer-times').innerHTML = Object.entries(map).map(([k,v]) => `
-                        <div class="p-item"><div>${v}</div><b>${t[k]}</b></div>
-                    `).join('');
-                });
-            });
+        // --- الأكاديمية والكتب ---
+        let currentLvl = 1;
+        let finished = [];
+        const levels = {
+            1: { name: "مبتدئ", books: [{id:"1", n:"الأصول الثلاثة", u:"https://ia800203.us.archive.org/21/items/waq63750/63750.pdf"}] },
+            2: { name: "طالب علم", books: [{id:"2", n:"كتاب التوحيد", u:"https://ia801306.us.archive.org/16/items/waq466/466.pdf"}] }
+        };
+
+        function renderBooks() {
+            const list = document.getElementById('books-list');
+            const data = levels[currentLvl];
+            document.getElementById('rank-name').innerText = data.name;
+            list.innerHTML = data.books.map(b => `
+                <div style="display:flex; justify-content:space-between; padding:10px; background:#1a1f26; border-radius:10px; margin-bottom:5px;">
+                    <div><input type="checkbox" onchange="toggleB('${b.id}')"> ${b.n}</div>
+                    <a href="${b.u}" target="_blank" style="color:var(--accent)"><i class="fas fa-file-pdf"></i></a>
+                </div>
+            `).join('');
         }
 
-        function switchNav(tab, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-            document.getElementById('tab-' + tab).style.display = 'block';
+        function toggleB(id) {
+            document.getElementById('snd-click').play();
+            if(finished.includes(id)) finished = finished.filter(x => x!==id);
+            else finished.push(id);
+            document.getElementById('quiz-btn').style.display = (finished.length === levels[currentLvl].books.length) ? 'block' : 'none';
+        }
+
+        function openExam() {
+            document.getElementById('snd-success').play();
+            confetti();
+            alert("مبارك النجاح! تم ترقيتك للمستوى التالي.");
+            currentLvl++; finished = []; renderBooks();
+        }
+
+        function nav(p, el) {
+            document.getElementById('snd-click').play();
+            document.querySelectorAll('.page').forEach(pg => pg.style.display = 'none');
+            document.getElementById('tab-'+p).style.display = 'block';
             document.querySelectorAll('.nav i').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-        }
-
-        function manualSet() {
-            const n = prompt("أدخل عدد الصلوات الفائتة:");
-            if(n !== null) { userData.missed = parseInt(n); saveData(); }
         }
     </script>
 </body>
